@@ -17,21 +17,28 @@ Session::initialize();
 $data = new Comment;
 
 
-if (isset($_GET["id"])) {
-
+//if the id is present in the get method - find corresponding comment in the database and put the data into $data variable
+if (!empty($_GET["id"])) {
     $id = $_GET["id"];
     $data = find($id, "Comment");
 }
+
+
+/**
+ * if the comment data were passed in the $_SESSION variable, then use them
+ * if not, use the data which were already set
+ */
 
 $data->name = $_SESSION["comment"]->name ?? $data->name;
 $data->email = $_SESSION["comment"]->email ?? $data->email;
 $data->comment = $_SESSION["comment"]->comment ?? $data->comment;
 
+
+//if there were some errors passed in the $_SESSION variable, insert them in the $errors variable
 if (isset($_SESSION["errors"])) {
     $errors = $_SESSION["errors"];
 }
 
-var_dump($_SESSION);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -78,9 +85,11 @@ var_dump($_SESSION);
     <div class="comments">
         <h2>Comment below:</h2>
 
-        <!-- your code here -->
 
-        <?php if (!empty($errors["general"])) : ?>
+
+        <?php
+        // display if the general error message is present in the $errors
+        if (!empty($errors["general"])) : ?>
 
             <div class="error">
                 <?= $errors["general"] ?>
@@ -88,17 +97,25 @@ var_dump($_SESSION);
 
         <?php endif ?>
 
-        <?php if (!empty($_SESSION["Success-general"])) : ?>
+        <?php
+        // display if the general success message is present in $_SESSION
+        if (!empty($_SESSION["Success-general"])) : ?>
 
             <div class="success">
                 <?= $_SESSION["Success-general"] ?>
             </div>
 
         <?php
+            // unset the succeess generral message from the $_SESSION
             unset($_SESSION['Success-general']);
         endif ?>
 
-
+        <?php
+        /**
+         * create the form and put the values from $data variable as 
+         * values (or text in textarea) if there are some data present 
+         */
+        ?>
         <form action="handle-form.php?id=<?= $id ?>" method="post">
             <input name="name" type="text" placeholder="*Nickname" value="<?= $data->name ?>">
             <?php if (!empty($errors["name"])) : ?>
@@ -113,7 +130,9 @@ var_dump($_SESSION);
             <input name="email" type="email" placeholder="Email" value="<?= $data->email ?>">
 
             <textarea name="comment" placeholder="*Leave your comment here"><?= $data->comment ?></textarea>
-            <?php if (!empty($errors["comment"])) : ?>
+            <?php
+            // display if the comment error message is present in the $errors
+            if (!empty($errors["comment"])) : ?>
 
                 <div class="error">
                     <?= $errors["comment"] ?>
@@ -127,7 +146,9 @@ var_dump($_SESSION);
 
 
 
-        <?php foreach ($comments as $comment) : ?>
+        <?php
+        //loop from all comments from database and display them on the page
+        foreach ($comments as $comment) : ?>
 
             <div class="comments__answer answer">
                 <div class="answer_name"><a href="mailto:<?= $comment->email ?>">
@@ -141,7 +162,19 @@ var_dump($_SESSION);
 
 
             </div>
+            <?php
+            /**
+             * EDIT button is added to each comment loaded from
+             * the database. It directs back to this page but passes id in the GET method
+             * and that triggers the condition of finding corresponding comment in the database
+             * and inserting the data from it in the form
+             */
+            ?>
             <a href="index.php?id=<?= $comment->id ?>"> <button>EDIT</button></a>
+
+            <?php
+            // DELETE button deletes corresponding comment from the database and from the page
+            ?>
             <a href="handle-form.php?delete=true&id=<?= $comment->id ?>"> <button>DELETE</button></a>
 
 

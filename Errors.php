@@ -2,11 +2,12 @@
 
 class Errors
 {
-
-    public ?string $name = "The name is required!";
-    public ?string $comment = "There is no comment!";
-    public ?string $general = "You are missing some data!";
-
+    public array $messages = [
+        "name" => "The name is required!",
+        "comment" => "There is no comment!",
+        "general" => "You are missing some data!",
+        "default" => "Somethng went wrong!"
+    ];
     public  array $errors = [];
 
     public static $initialize = null;
@@ -21,12 +22,10 @@ class Errors
 
     public function set($key)
     {
-        $keys = [
-            "name" => $this->name,
-            "comment" => $this->comment,
-            "general" => $this->general
-        ];
-
-        $this->errors[$key] = $keys[$key];
+        if (isset($this->messages[$key])) {
+            $this->errors[$key] = $this->messages[$key];
+        } else {
+            $this->errors[$key] = $this->messages["default"];
+        }
     }
 }
